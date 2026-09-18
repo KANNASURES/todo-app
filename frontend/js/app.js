@@ -5,13 +5,14 @@
 
 // ─── Global State ────────────────────────────
 const App = {
-    tasks: [],              // All tasks in memory
-    filteredTasks: [],      // Tasks after filter/search
-    activeCategory: 'all',  // Current category tab
-    filterPriority: '',     // Current priority filter
-    sortOrder: 'newest',    // Current sort order
-    searchQuery: '',        // Current search text
-    editingTaskId: null,    // ID of task being edited
+    tasks: [],
+    filteredTasks: [],
+    activeCategory: 'all',
+    filterPriority: '',
+    sortOrder: 'newest',
+    searchQuery: '',
+    editingTaskId: null,
+    isLoading: false,   // ← NEW: tracks loading state
 };
 
 // ─── Motivational Quotes ─────────────────────
@@ -28,18 +29,18 @@ const QUOTES = [
 
 // ─── Category Config ─────────────────────────
 const CATEGORIES = {
-    study:    { emoji: '📚', label: 'Study' },
+    study: { emoji: '📚', label: 'Study' },
     personal: { emoji: '🏠', label: 'Personal' },
-    health:   { emoji: '💪', label: 'Health' },
-    work:     { emoji: '💼', label: 'Work' },
-    other:    { emoji: '⭐', label: 'Other' },
+    health: { emoji: '💪', label: 'Health' },
+    work: { emoji: '💼', label: 'Work' },
+    other: { emoji: '⭐', label: 'Other' },
 };
 
 // ─── Priority Config ─────────────────────────
 const PRIORITIES = {
-    high:   { emoji: '🔴', label: 'High' },
+    high: { emoji: '🔴', label: 'High' },
     medium: { emoji: '🟡', label: 'Medium' },
-    low:    { emoji: '🟢', label: 'Low' },
+    low: { emoji: '🟢', label: 'Low' },
 };
 /* =============================================
    DATE & GREETING
@@ -47,7 +48,7 @@ const PRIORITIES = {
 
 function getGreeting() {
     const hour = new Date().getHours();
-    if (hour >= 5  && hour < 12) return '🌅 Good Morning';
+    if (hour >= 5 && hour < 12) return '🌅 Good Morning';
     if (hour >= 12 && hour < 17) return '☀️ Good Afternoon';
     if (hour >= 17 && hour < 21) return '🌆 Good Evening';
     return '🌙 Good Night';
@@ -57,9 +58,9 @@ function getFormattedDate() {
     const now = new Date();
     const options = {
         weekday: 'long',
-        year:    'numeric',
-        month:   'long',
-        day:     'numeric',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
     };
     return now.toLocaleDateString('en-US', options);
 }
@@ -68,8 +69,8 @@ function getShortDate() {
     const now = new Date();
     const options = {
         weekday: 'short',
-        month:   'short',
-        day:     'numeric',
+        month: 'short',
+        day: 'numeric',
     };
     return now.toLocaleDateString('en-US', options);
 }
@@ -115,10 +116,10 @@ function formatDueDate(dateStr, timeStr) {
     const diffDays = Math.round((dueDay - today) / (1000 * 60 * 60 * 24));
 
     let label = '';
-    if (diffDays < 0)       label = `⚠️ Overdue by ${Math.abs(diffDays)} day(s)`;
+    if (diffDays < 0) label = `⚠️ Overdue by ${Math.abs(diffDays)} day(s)`;
     else if (diffDays === 0) label = '📅 Due Today';
     else if (diffDays === 1) label = '📅 Due Tomorrow';
-    else                     label = `📅 Due in ${diffDays} days`;
+    else label = `📅 Due in ${diffDays} days`;
 
     // Add time if provided
     if (timeStr) {
@@ -148,17 +149,17 @@ function getTodayString() {
 ============================================= */
 
 function updateStats() {
-    const total     = App.tasks.length;
+    const total = App.tasks.length;
     const completed = App.tasks.filter(t => t.is_completed).length;
-    const overdue   = App.tasks.filter(t => isTaskOverdue(t)).length;
-    const pending   = total - completed;
-    const percent   = total === 0 ? 0 : Math.round((completed / total) * 100);
+    const overdue = App.tasks.filter(t => isTaskOverdue(t)).length;
+    const pending = total - completed;
+    const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
 
     // Update stat numbers with animation
-    animateNumber('#statTotal',     total);
-    animateNumber('#statPending',   pending);
+    animateNumber('#statTotal', total);
+    animateNumber('#statPending', pending);
     animateNumber('#statCompleted', completed);
-    animateNumber('#statOverdue',   overdue);
+    animateNumber('#statOverdue', overdue);
 
     // Update progress ring
     updateProgressRing(percent);
@@ -195,11 +196,11 @@ function updateProgressRing(percent) {
 ============================================= */
 
 function buildTaskCard(task) {
-    const cat      = CATEGORIES[task.category] || { emoji: '⭐', label: task.category };
-    const pri      = PRIORITIES[task.priority]  || { emoji: '🟡', label: task.priority };
-    const dueInfo  = formatDueDate(task.due_date, task.due_time);
-    const overdue  = isTaskOverdue(task);
-    const checked  = task.is_completed ? 'checked' : '';
+    const cat = CATEGORIES[task.category] || { emoji: '⭐', label: task.category };
+    const pri = PRIORITIES[task.priority] || { emoji: '🟡', label: task.priority };
+    const dueInfo = formatDueDate(task.due_date, task.due_time);
+    const overdue = isTaskOverdue(task);
+    const checked = task.is_completed ? 'checked' : '';
     const doneClass = task.is_completed ? 'completed' : '';
 
     // Due date HTML
@@ -298,7 +299,7 @@ function renderTasks() {
     // Store filtered result
     App.filteredTasks = tasks;
 
-    const $taskList  = $('#taskList');
+    const $taskList = $('#taskList');
     const $emptyState = $('#emptyState');
 
     $taskList.empty();
@@ -348,12 +349,12 @@ function sortTasks(tasks, order) {
 
 function getFormData() {
     return {
-        title:       $('#taskTitle').val().trim(),
+        title: $('#taskTitle').val().trim(),
         description: $('#taskDesc').val().trim(),
-        category:    $('#taskCategory').val(),
-        priority:    $('input[name="priority"]:checked').val() || 'medium',
-        due_date:    $('#taskDueDate').val(),
-        due_time:    $('#taskDueTime').val(),
+        category: $('#taskCategory').val(),
+        priority: $('input[name="priority"]:checked').val() || 'medium',
+        due_date: $('#taskDueDate').val(),
+        due_time: $('#taskDueTime').val(),
     };
 }
 
@@ -383,45 +384,39 @@ function clearForm() {
     $('#taskTitle').focus();
 }
 
-function addTask() {
+async function addTask() {
     const data = getFormData();
     if (!validateTask(data)) return;
 
-    // Build task object
-    const newTask = {
-        id:           generateId(),
-        title:        data.title,
-        description:  data.description,
-        category:     data.category || 'other',
-        priority:     data.priority,
-        due_date:     data.due_date || null,
-        due_time:     data.due_time || null,
-        is_completed: false,
-        created_at:   new Date().toISOString(),
-    };
+    // Disable button to prevent double submit
+    $('#addTaskBtn').prop('disabled', true).text('Adding...');
 
-    // Add to App state
-    App.tasks.unshift(newTask);
+    try {
+        const newTask = await TaskAPI.create(data);
 
-    // Save to localStorage (temporary — until backend is ready)
-    saveTasksToStorage();
+        // Add to local state
+        App.tasks.unshift(newTask);
+        renderTasks();
+        clearForm();
+        showToast('✅ Task added successfully!', 'success');
 
-    // Re-render
-    renderTasks();
-    clearForm();
-
-    showToast('✅ Task added successfully!', 'success');
+    } catch (error) {
+        showToast('❌ Failed to add task. Try again!', 'error');
+        console.error('Add task error:', error);
+    } finally {
+        // Re-enable button
+        $('#addTaskBtn').prop('disabled', false).text('➕ Add Task');
+    }
 }
 /* =============================================
    DELETE TASK
 ============================================= */
 
-function deleteTask(taskId) {
-    // Find task title for the toast
+async function deleteTask(taskId) {
     const task = App.tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Animate card out before removing
+    // Animate card out
     const $card = $(`.task-card[data-id="${taskId}"]`);
     $card.css({
         transition: 'all 0.3s ease',
@@ -429,32 +424,60 @@ function deleteTask(taskId) {
         transform: 'translateX(40px)',
     });
 
-    setTimeout(() => {
-        App.tasks = App.tasks.filter(t => t.id !== taskId);
-        saveTasksToStorage();
-        renderTasks();
-        showToast(`🗑️ "${task.title}" deleted!`, 'info');
-    }, 300);
+    try {
+        await TaskAPI.delete(taskId);
+
+        // Remove from local state after animation
+        setTimeout(() => {
+            App.tasks = App.tasks.filter(t => t.id !== taskId);
+            renderTasks();
+            updateStats();
+            showToast(`🗑️ "${task.title}" deleted!`, 'info');
+        }, 300);
+
+    } catch (error) {
+        // Revert animation if failed
+        $card.css({
+            opacity: '1',
+            transform: 'translateX(0)',
+        });
+        showToast('❌ Failed to delete task!', 'error');
+    }
 }
 
 /* =============================================
    TOGGLE COMPLETE
 ============================================= */
 
-function toggleComplete(taskId) {
+async function toggleComplete(taskId) {
     const task = App.tasks.find(t => t.id === taskId);
     if (!task) return;
 
+    // Optimistic UI update
+    // (update screen immediately, then confirm with server)
     task.is_completed = !task.is_completed;
-    saveTasksToStorage();
     renderTasks();
 
-    const msg = task.is_completed
-        ? `🎉 "${task.title}" completed!`
-        : `↩️ "${task.title}" marked incomplete`;
-    showToast(msg, 'success');
-}
+    try {
+        const isCompleted = await TaskAPI.toggleComplete(taskId);
 
+        // Confirm with server response
+        task.is_completed = isCompleted;
+        renderTasks();
+        updateStats();
+
+        const msg = isCompleted
+            ? `🎉 "${task.title}" completed!`
+            : `↩️ "${task.title}" marked incomplete`;
+        showToast(msg, 'success');
+
+    } catch (error) {
+        // Revert if API call failed
+        task.is_completed = !task.is_completed;
+        renderTasks();
+        showToast('❌ Failed to update task!', 'error');
+    }
+}
 /* =============================================
    EDIT TASK
 ============================================= */
@@ -481,9 +504,9 @@ function openEditModal(taskId) {
     modal.show();
 }
 
-function saveEdit() {
+async function saveEdit() {
     const taskId = App.editingTaskId;
-    const task   = App.tasks.find(t => t.id === taskId);
+    const task = App.tasks.find(t => t.id === taskId);
     if (!task) return;
 
     const title = $('#editTaskTitle').val().trim();
@@ -494,40 +517,79 @@ function saveEdit() {
         return;
     }
 
-    // Update task
-    task.title       = title;
-    task.description = $('#editTaskDesc').val().trim();
-    task.category    = $('#editTaskCategory').val() || 'other';
-    task.priority    = $('input[name="editPriority"]:checked').val() || 'medium';
-    task.due_date    = $('#editTaskDueDate').val() || null;
-    task.due_time    = $('#editTaskDueTime').val() || null;
+    // Disable save button
+    $('#saveEditBtn').prop('disabled', true).text('Saving...');
 
-    saveTasksToStorage();
-    renderTasks();
+    const updatedData = {
+        title: title,
+        description: $('#editTaskDesc').val().trim(),
+        category: $('#editTaskCategory').val() || 'other',
+        priority: $('input[name="editPriority"]:checked').val() || 'medium',
+        due_date: $('#editTaskDueDate').val() || null,
+        due_time: $('#editTaskDueTime').val() || null,
+    };
 
-    // Close modal
-    bootstrap.Modal.getInstance($('#editTaskModal')[0]).hide();
-    showToast('💾 Task updated!', 'success');
-    App.editingTaskId = null;
+    try {
+        const updatedTask = await TaskAPI.update(taskId, updatedData);
+
+        // Update local state
+        const index = App.tasks.findIndex(t => t.id === taskId);
+        if (index !== -1) {
+            App.tasks[index] = {
+                ...App.tasks[index],
+                ...updatedTask,
+            };
+        }
+
+        renderTasks();
+        bootstrap.Modal.getInstance($('#editTaskModal')[0]).hide();
+        showToast('💾 Task updated successfully!', 'success');
+        App.editingTaskId = null;
+
+    } catch (error) {
+        showToast('❌ Failed to update task!', 'error');
+        console.error('Save edit error:', error);
+    } finally {
+        $('#saveEditBtn').prop('disabled', false).text('💾 Save Changes');
+    }
 }
 /* =============================================
    LOCAL STORAGE (Temporary until backend)
 ============================================= */
 
-const TASKS_KEY = 'studyflow-tasks';
 
-function saveTasksToStorage() {
-    localStorage.setItem(TASKS_KEY, JSON.stringify(App.tasks));
-}
 
-function loadTasksFromStorage() {
-    const stored = localStorage.getItem(TASKS_KEY);
-    if (stored) {
-        try {
-            App.tasks = JSON.parse(stored);
-        } catch (e) {
-            App.tasks = [];
-        }
+async function loadTasksFromAPI() {
+    // Show loading spinner
+    $('#loadingSpinner').show();
+    $('#taskList').hide();
+    $('#emptyState').hide();
+
+    try {
+        App.tasks = await TaskAPI.getAll();
+        renderTasks();
+        updateStats();
+    } catch (error) {
+        // Show error state with retry button
+        $('#loadingSpinner').hide();
+        $('#taskList').html(`
+            <div class="api-error-state">
+                <div class="api-error-emoji">⚠️</div>
+                <h5 class="api-error-title">Cannot connect to server</h5>
+                <p class="api-error-subtitle">
+                    Make sure your backend is running on port 5000<br>
+                    Run: <code>npm run dev</code> in your terminal
+                </p>
+                <button class="btn-retry" onclick="loadTasksFromAPI()">
+                    🔄 Try Again
+                </button>
+            </div>
+        `);
+        $('#taskList').show();
+        showToast('❌ Cannot connect to server!', 'error');
+    } finally {
+        $('#loadingSpinner').hide();
+        $('#taskList').show();
     }
 }
 /* =============================================
@@ -555,7 +617,7 @@ function initEventListeners() {
     // ── Delete Button ────────────────────────
     $(document).on('click', '.btn-task-delete', function () {
         const taskId = $(this).data('id');
-        const task   = App.tasks.find(t => t.id === taskId);
+        const task = App.tasks.find(t => t.id === taskId);
         if (!task) return;
 
         // Confirm before delete
@@ -607,9 +669,9 @@ function initEventListeners() {
 
     // ── Clear Filters Button ─────────────────
     $('#clearFilters').on('click', function () {
-        App.searchQuery    = '';
+        App.searchQuery = '';
         App.filterPriority = '';
-        App.sortOrder      = 'newest';
+        App.sortOrder = 'newest';
         App.activeCategory = 'all';
 
         $('#searchInput').val('');
@@ -630,28 +692,28 @@ function initEventListeners() {
    MAIN INIT — Called on DOM ready
 ============================================= */
 
-function initApp() {
+async function initApp() {
     // 1. Date & greeting
     initDateAndGreeting();
 
-    // 2. Load saved tasks from localStorage
-    loadTasksFromStorage();
-
-    // 3. Wire up all event listeners
+    // 2. Wire up all event listeners
     initEventListeners();
 
-    // 4. Render tasks
-    renderTasks();
+    // 3. Load tasks from REAL backend API
+    await loadTasksFromAPI();
 
-    // 5. Update stats
-    updateStats();
-
-    // 6. Set min date on inputs
+    // 4. Set min date on inputs
     const today = getTodayString();
     $('#taskDueDate, #editTaskDueDate').attr('min', today);
 
-    console.log('✅ StudyFlow App initialized!');
+    console.log('✅ StudyFlow App initialized with backend!');
 }
+
+// ─── START THE APP ────────────────────────────
+$(document).ready(function () {
+    ThemeManager.init();
+    initApp();
+});
 
 // ─── START THE APP ────────────────────────────
 $(document).ready(function () {
