@@ -97,19 +97,27 @@ app.use((err, req, res, next) => {
    First test DB connection, then start server
 ──────────────────────────────────────────── */
 async function startServer() {
-    // We'll connect DB after Phase 7 (MySQL setup)
-    // For now just start the server
-    app.listen(PORT, () => {
-        console.log('');
-        console.log('🚀 ================================');
-        console.log(' StudyFlow API Server Running! 🎉')
-        console.log(`   Port    : ${PORT}`);
-        console.log(`   Mode    : ${process.env.NODE_ENV}`);
-        console.log(`   API     : http://localhost:${PORT}/api`);
-        console.log(`   Health  : http://localhost:${PORT}/api/health`);
-        console.log('================================ 🚀');
-        console.log('');
-    });
+    try {
+        // Test DB connection FIRST
+        await testConnection();
+
+        // Then start the server
+        app.listen(PORT, () => {
+            console.log('');
+            console.log('🚀 ================================');
+            console.log(`   StudyFlow Server Running!`);
+            console.log(`   Port    : ${PORT}`);
+            console.log(`   Mode    : ${process.env.NODE_ENV}`);
+            console.log(`   API     : http://localhost:${PORT}/api`);
+            console.log(`   Health  : http://localhost:${PORT}/api/health`);
+            console.log('================================ 🚀');
+            console.log('');
+        });
+
+    } catch (error) {
+        console.error('❌ Failed to start server:', error.message);
+        process.exit(1);
+    }
 }
 
 startServer();
