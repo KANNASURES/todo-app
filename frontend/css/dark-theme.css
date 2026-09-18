@@ -1,0 +1,394 @@
+/* =============================================
+   DARK THEME — StudyFlow
+   Applied when <html data-theme="dark">
+============================================= */
+[data-theme="dark"] {
+    /* Background Colors */
+    --bg-main:    #0F0F1A;
+    --bg-card:    #1A1A2E;
+    --bg-navbar:  #13131F;
+    --bg-footer:  #13131F;
+    --bg-input:   #22223A;
+    --bg-stats:   #1A1A2E;
+    --bg-modal:   #1A1A2E;
+
+    /* Text Colors */
+    --text-primary:   #F0F0FF;
+    --text-secondary: #A0A0C0;
+    --text-muted:     #6060A0;
+    --text-navbar:    #F0F0FF;
+
+    /* Border & Shadow */
+    --border-color: #2A2A4A;
+    --shadow-sm:    0 2px 8px  rgba(0, 0, 0, 0.4);
+    --shadow-md:    0 4px 20px rgba(0, 0, 0, 0.5);
+    --shadow-lg:    0 8px 40px rgba(0, 0, 0, 0.6);
+    --shadow-card:  0 2px 16px rgba(0, 0, 0, 0.45);
+
+    /* Priority Colors — slightly brighter for dark bg */
+    --priority-high-bg:   #2E1A1A;
+    --priority-medium-bg: #2E2A10;
+    --priority-low-bg:    #1A2E1E;
+
+    /* Category Backgrounds — darker tints */
+    --cat-study-bg:    #1E1A3A;
+    --cat-personal-bg: #2E1A22;
+    --cat-health-bg:   #1A2E2A;
+    --cat-work-bg:     #2E2A10;
+    --cat-other-bg:    #221A3A;
+}
+
+/* =============================================
+   DARK — NAVBAR
+============================================= */
+[data-theme="dark"] #mainNavbar {
+    background: var(--bg-navbar);
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .brand-name {
+    color: var(--primary-light);
+}
+
+[data-theme="dark"] .nav-date {
+    background: var(--bg-input);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .theme-toggle-wrapper {
+    background: var(--bg-input);
+    border-color: var(--border-color);
+}
+
+/* =============================================
+   DARK — HERO SECTION
+============================================= */
+[data-theme="dark"] .hero-section {
+    background: linear-gradient(
+        135deg,
+        #1A1A3A 0%,
+        #2A1A2E 50%,
+        #1A2A2E 100%
+    );
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .hero-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .greeting-sub {
+    color: var(--primary-light);
+}
+
+[data-theme="dark"] .hero-date {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .progress-ring-bg {
+    stroke: var(--border-color);
+}
+
+[data-theme="dark"] .progress-percent {
+    color: var(--primary-light);
+}
+
+[data-theme="dark"] .progress-label,
+[data-theme="dark"] .progress-caption {
+    color: var(--text-secondary);
+}
+
+/* =============================================
+   DARK — STATS BAR
+============================================= */
+
+/* Stat card gradients stay the same — they look
+   great on dark backgrounds already             */
+[data-theme="dark"] .stat-card {
+    box-shadow: var(--shadow-md);
+}
+
+/* =============================================
+   DARK — FORM CARD & INPUTS
+============================================= */
+[data-theme="dark"] .add-task-card {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-card);
+}
+
+[data-theme="dark"] .card-section-title {
+    color: var(--text-primary);
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .form-label {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .custom-input {
+    background: var(--bg-input);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .custom-input:focus {
+    background: #2A2A45;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(168, 156, 255, 0.2);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .custom-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Fix Bootstrap's select dark bg */
+[data-theme="dark"] .form-select.custom-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23A0A0C0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* Priority buttons dark */
+[data-theme="dark"] .priority-btn {
+    border-width: 2px;
+}
+
+[data-theme="dark"] .priority-high {
+    background: var(--priority-high-bg);
+}
+
+[data-theme="dark"] .priority-medium {
+    background: var(--priority-medium-bg);
+}
+
+[data-theme="dark"] .priority-low {
+    background: var(--priority-low-bg);
+}
+
+/* =============================================
+   DARK — SEARCH & FILTER BAR
+============================================= */
+[data-theme="dark"] .search-filter-bar {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .btn-clear-filter {
+    background: var(--bg-input);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .btn-clear-filter:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary);
+    color: white;
+}
+
+/* =============================================
+   DARK — CATEGORY TABS
+============================================= */
+[data-theme="dark"] .category-tabs {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .category-tab {
+    background: var(--bg-input);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .category-tab:hover {
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+    background: var(--cat-study-bg);
+}
+
+[data-theme="dark"] .category-tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border-color: transparent;
+}
+
+/* =============================================
+   DARK — TASK CARDS
+============================================= */
+[data-theme="dark"] .task-card {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .task-card:hover {
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .task-card.completed {
+    background: #14141F;
+    opacity: 0.6;
+}
+
+[data-theme="dark"] .task-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .task-desc {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .task-due {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .task-due.overdue {
+    color: var(--priority-high);
+}
+
+[data-theme="dark"] .task-checkbox {
+    background: var(--bg-input);
+    border-color: var(--primary-light);
+}
+
+[data-theme="dark"] .task-checkbox:checked {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-color: transparent;
+}
+
+[data-theme="dark"] .btn-task-edit,
+[data-theme="dark"] .btn-task-delete {
+    background: var(--bg-input);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .btn-task-edit:hover {
+    background: var(--cat-study-bg);
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+}
+
+[data-theme="dark"] .btn-task-delete:hover {
+    background: var(--priority-high-bg);
+    border-color: var(--priority-high);
+    color: var(--priority-high);
+}
+
+/* =============================================
+   DARK — EMPTY STATE
+============================================= */
+[data-theme="dark"] .empty-state {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .empty-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .empty-subtitle {
+    color: var(--text-secondary);
+}
+
+/* =============================================
+   DARK — MODAL
+============================================= */
+[data-theme="dark"] .custom-modal {
+    background: var(--bg-modal);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .custom-modal .modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .custom-modal .modal-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .custom-modal .modal-footer {
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .btn-close {
+    filter: invert(1) brightness(0.7);
+}
+
+[data-theme="dark"] .btn-cancel {
+    background: var(--bg-input);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .btn-cancel:hover {
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+}
+
+/* =============================================
+   DARK — FOOTER
+============================================= */
+[data-theme="dark"] .app-footer {
+    background: var(--bg-footer);
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .footer-quote {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .footer-copy {
+    color: var(--text-muted);
+}
+
+/* =============================================
+   DARK — SCROLLBAR
+============================================= */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: var(--bg-main);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #3A3A6A;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* =============================================
+   DARK — TOAST NOTIFICATION
+============================================= */
+[data-theme="dark"] .toast-notification {
+    background: #2A2A4A;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+/* =============================================
+   SMOOTH THEME TRANSITION
+   (Entire page transitions smoothly)
+============================================= */
+*,
+*::before,
+*::after {
+    transition:
+        background-color 0.35s ease,
+        border-color     0.35s ease,
+        color            0.2s ease,
+        box-shadow       0.35s ease;
+}
+
+/* But don't slow down animations */
+.brand-emoji,
+.empty-emoji,
+.progress-ring-fill,
+.task-card,
+.btn-add-task,
+.btn-save-task,
+.category-tab,
+.stat-card,
+.btn-clear-filter {
+    transition: var(--transition-bounce);
+}
