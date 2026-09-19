@@ -392,3 +392,6 @@
 .btn-clear-filter {
     transition: var(--transition-bounce);
 }
+[data-theme="dark"] #pageLoader {
+    background: linear-gradient(135deg, #1A1A2E, #2A1A2E);
+}

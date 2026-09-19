@@ -28,13 +28,9 @@ app.use(helmet());
    this backend API without browser blocking it
 ──────────────────────────────────────────── */
 app.use(cors({
-    origin: [
-        process.env.FRONTEND_URL,
-        'http://localhost:5500',
-        'http://127.0.0.1:5500',
-    ],
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    credentials: true,
+    credentials: false,
 }));
 
 /* ─── BODY PARSER MIDDLEWARE ────────────────

@@ -1223,3 +1223,61 @@ textarea.custom-input {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
+/* =============================================
+   PAGE LOADER
+============================================= */
+#pageLoader {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #6C63FF, #FF6584);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#pageLoader.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.page-loader-content {
+    text-align: center;
+    color: white;
+}
+
+.loader-emoji {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 12px;
+    animation: float 1.5s ease-in-out infinite;
+}
+
+.loader-title {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: white;
+    margin-bottom: 24px;
+}
+
+.loader-bar {
+    width: 200px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.loader-bar-fill {
+    height: 100%;
+    background: white;
+    border-radius: 10px;
+    animation: loadBar 1.2s ease forwards;
+}
+
+@keyframes loadBar {
+    from { width: 0%; }
+    to   { width: 100%; }
+}

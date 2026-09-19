@@ -1,4 +1,16 @@
+# Dependencies
 node_modules/
+
+# Environment variables (NEVER push to GitHub!)
 .env
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Logs
 *.log
+npm-debug.log*
+
+# Editor
+.vscode/settings.json

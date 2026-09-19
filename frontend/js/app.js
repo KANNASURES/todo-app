@@ -725,6 +725,11 @@ async function initApp() {
     $('#taskDueDate, #editTaskDueDate').attr('min', today);
 
     console.log('✅ StudyFlow App initialized with backend!');
+    // Hide page loader after everything loads
+    setTimeout(() => {
+        $('#pageLoader').addClass('hidden');
+        setTimeout(() => $('#pageLoader').remove(), 500);
+    }, 800);
 }
 
 // ─── START THE APP ────────────────────────────
