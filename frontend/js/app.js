@@ -149,13 +149,15 @@ function getTodayString() {
 ============================================= */
 
 function updateStats() {
+    // Always use the FULL App.tasks array for stats
+    // (not filteredTasks — stats should reflect ALL tasks)
     const total = App.tasks.length;
     const completed = App.tasks.filter(t => t.is_completed).length;
     const overdue = App.tasks.filter(t => isTaskOverdue(t)).length;
     const pending = total - completed;
     const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
 
-    // Update stat numbers with animation
+    // Update numbers
     animateNumber('#statTotal', total);
     animateNumber('#statPending', pending);
     animateNumber('#statCompleted', completed);
@@ -170,6 +172,11 @@ function updateStats() {
 function animateNumber(selector, target) {
     const el = $(selector);
     const start = parseInt(el.text()) || 0;
+    if (start === target) {
+        el.text(target);
+        return;
+    }
+
     const duration = 600;
     const step = (target - start) / (duration / 16);
     let current = start;
@@ -299,6 +306,9 @@ function renderTasks() {
     // Store filtered result
     App.filteredTasks = tasks;
 
+    // Stats always reflect the full task list, even when filters hide every card.
+    updateStats();
+
     const $taskList = $('#taskList');
     const $emptyState = $('#emptyState');
 
@@ -319,8 +329,6 @@ function renderTasks() {
         $taskList.append($card);
     });
 
-    // Update stats after render
-    updateStats();
 }
 
 function sortTasks(tasks, order) {
@@ -384,11 +392,18 @@ function clearForm() {
     $('#taskTitle').focus();
 }
 
+// Guard flag — prevents double submission
+let isSubmitting = false;
+
 async function addTask() {
+    // If already submitting, ignore the call
+    if (isSubmitting) return;
+
     const data = getFormData();
     if (!validateTask(data)) return;
 
-    // Disable button to prevent double submit
+    // Lock submission
+    isSubmitting = true;
     $('#addTaskBtn').prop('disabled', true).text('Adding...');
 
     try {
@@ -397,6 +412,7 @@ async function addTask() {
         // Add to local state
         App.tasks.unshift(newTask);
         renderTasks();
+        updateStats();
         clearForm();
         showToast('✅ Task added successfully!', 'success');
 
@@ -404,7 +420,8 @@ async function addTask() {
         showToast('❌ Failed to add task. Try again!', 'error');
         console.error('Add task error:', error);
     } finally {
-        // Re-enable button
+        // Unlock submission
+        isSubmitting = false;
         $('#addTaskBtn').prop('disabled', false).text('➕ Add Task');
     }
 }
@@ -427,13 +444,10 @@ async function deleteTask(taskId) {
     try {
         await TaskAPI.delete(taskId);
 
-        // Remove from local state after animation
-        setTimeout(() => {
-            App.tasks = App.tasks.filter(t => t.id !== taskId);
-            renderTasks();
-            updateStats();
-            showToast(`🗑️ "${task.title}" deleted!`, 'info');
-        }, 300);
+        // Remove from local state as soon as the server confirms deletion.
+        App.tasks = App.tasks.filter(t => t.id !== taskId);
+        renderTasks();
+        showToast(`🗑️ "${task.title}" deleted!`, 'info');
 
     } catch (error) {
         // Revert animation if failed
@@ -453,18 +467,22 @@ async function toggleComplete(taskId) {
     const task = App.tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Optimistic UI update
-    // (update screen immediately, then confirm with server)
+    // Optimistic update
     task.is_completed = !task.is_completed;
+
+    // ✅ Update stats immediately
+    updateStats();
     renderTasks();
 
     try {
         const isCompleted = await TaskAPI.toggleComplete(taskId);
 
-        // Confirm with server response
+        // Confirm with server
         task.is_completed = isCompleted;
-        renderTasks();
+
+        // ✅ Update stats again after server confirms
         updateStats();
+        renderTasks();
 
         const msg = isCompleted
             ? `🎉 "${task.title}" completed!`
@@ -472,8 +490,9 @@ async function toggleComplete(taskId) {
         showToast(msg, 'success');
 
     } catch (error) {
-        // Revert if API call failed
+        // Revert on failure
         task.is_completed = !task.is_completed;
+        updateStats();
         renderTasks();
         showToast('❌ Failed to update task!', 'error');
     }
@@ -542,6 +561,7 @@ async function saveEdit() {
         }
 
         renderTasks();
+        updateStats();
         bootstrap.Modal.getInstance($('#editTaskModal')[0]).hide();
         showToast('💾 Task updated successfully!', 'success');
         App.editingTaskId = null;
@@ -599,46 +619,44 @@ async function loadTasksFromAPI() {
 function initEventListeners() {
 
     // ── Add Task Button ──────────────────────
-    $('#addTaskBtn').on('click', function () {
+    $('#addTaskBtn').off('click').on('click', function () {
         addTask();
     });
 
-    // ── Add Task on Enter key in title field ─
-    $('#taskTitle').on('keypress', function (e) {
+    // ── Add Task on Enter key ────────────────
+    $('#taskTitle').off('keypress').on('keypress', function (e) {
         if (e.which === 13) addTask();
     });
 
     // ── Checkbox Toggle ──────────────────────
-    $(document).on('change', '.task-checkbox', function () {
+    $(document).off('change', '.task-checkbox').on('change', '.task-checkbox', function () {
         const taskId = $(this).data('id');
         toggleComplete(taskId);
     });
 
     // ── Delete Button ────────────────────────
-    $(document).on('click', '.btn-task-delete', function () {
+    $(document).off('click', '.btn-task-delete').on('click', '.btn-task-delete', function () {
         const taskId = $(this).data('id');
         const task = App.tasks.find(t => t.id === taskId);
         if (!task) return;
-
-        // Confirm before delete
         if (confirm(`🗑️ Delete "${task.title}"?\nThis cannot be undone.`)) {
             deleteTask(taskId);
         }
     });
 
     // ── Edit Button ──────────────────────────
-    $(document).on('click', '.btn-task-edit', function () {
+    $(document).off('click', '.btn-task-edit').on('click', '.btn-task-edit', function () {
         const taskId = $(this).data('id');
         openEditModal(taskId);
     });
 
-    // ── Save Edit Button (in modal) ──────────
-    $('#saveEditBtn').on('click', function () {
+    // ── Save Edit Button ─────────────────────
+    $('#saveEditBtn').off('click').on('click', function () {
         saveEdit();
     });
 
     // ── Category Tabs ────────────────────────
-    $(document).on('click', '.category-tab', function () {
+    $(document).off('click', '.category-tab').on('click', '.category-tab', function () {
         $('.category-tab').removeClass('active');
         $(this).addClass('active');
         App.activeCategory = $(this).data('category');
@@ -646,20 +664,20 @@ function initEventListeners() {
     });
 
     // ── Priority Filter ──────────────────────
-    $('#filterPriority').on('change', function () {
+    $('#filterPriority').off('change').on('change', function () {
         App.filterPriority = $(this).val();
         renderTasks();
     });
 
     // ── Sort ─────────────────────────────────
-    $('#sortTasks').on('change', function () {
+    $('#sortTasks').off('change').on('change', function () {
         App.sortOrder = $(this).val();
         renderTasks();
     });
 
-    // ── Search (live, debounced) ─────────────
+    // ── Search ───────────────────────────────
     let searchTimer;
-    $('#searchInput').on('input', function () {
+    $('#searchInput').off('input').on('input', function () {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => {
             App.searchQuery = $(this).val().trim();
@@ -667,8 +685,8 @@ function initEventListeners() {
         }, 300);
     });
 
-    // ── Clear Filters Button ─────────────────
-    $('#clearFilters').on('click', function () {
+    // ── Clear Filters ────────────────────────
+    $('#clearFilters').off('click').on('click', function () {
         App.searchQuery = '';
         App.filterPriority = '';
         App.sortOrder = 'newest';
@@ -684,7 +702,7 @@ function initEventListeners() {
         showToast('🔄 Filters cleared!', 'info');
     });
 
-    // ── Set min date on date inputs ──────────
+    // ── Set min date ─────────────────────────
     const today = getTodayString();
     $('#taskDueDate, #editTaskDueDate').attr('min', today);
 }
@@ -708,12 +726,6 @@ async function initApp() {
 
     console.log('✅ StudyFlow App initialized with backend!');
 }
-
-// ─── START THE APP ────────────────────────────
-$(document).ready(function () {
-    ThemeManager.init();
-    initApp();
-});
 
 // ─── START THE APP ────────────────────────────
 $(document).ready(function () {
